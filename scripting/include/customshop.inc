@@ -11,6 +11,26 @@
 #define SHOP_OPEN PLUGIN_CONTINUE
 #define additem new
 
+enum _:CshopData
+{
+	CSHOP_DATA_ID = 0,
+	CSHOP_DATA_NAME,
+	CSHOP_DATA_PRICE,
+	CSHOP_DATA_LIMIT,
+	CSHOP_DATA_SOUND,
+	CSHOP_DATA_DURATION,
+	CSHOP_DATA_TEAM,
+	CSHOP_DATA_FLAGS
+}
+
+/*enum _:CshopPrecache
+{
+	CSHOP_PRECACHE_NONE = 0,
+	CSHOP_PRECACHE_GENERIC,
+	CSHOP_PRECACHE_MODEL,
+	CSHOP_PRECACHE_SOUND
+}*/
+
 /** 
  * Registers a new item.
  * 
@@ -207,11 +227,31 @@ native Float:cshop_get_float(item, setting[])
 native cshop_get_string(item, setting[], value[], len)
 
 /** 
- * Returns item name.
+ * Returns item's unique id.
+ *
+ * @param id 			Item id (string).
+ * @return 				Item id (integer).
+ */
+native cshop_find_item_by_id(id[])
+ 
+/** 
+ * Returns item data.
  *
  * @param item 			Item id.
- * @param name 			Buffer to store name in.
- * @param len 			Buffer length.
+ * @param type 			Data type.
+ * @param buffer 		Buffer to store string data in.
+ * @param buffer 		Buffer length.
+ * @return 				Integer or float type data. -1 on failure.
+ */
+native any:cshop_get_item_data(item, any:type, buffer[], len)
+#define cshop_get_name(%1,%2,%3) cshop_get_item_data(%1, CSHOP_DATA_NAME, %2, %3)
+
+/** 
+ * Called before a menu price is set.
+ *
+ * @param id 			Player's index.
+ * @param ite, 			Item's id.
+ * @param price 		Item's price.
  * @noreturn
  */
-native cshop_get_name(item, name[], len)
+forward cshop_set_price(id, item, price)
