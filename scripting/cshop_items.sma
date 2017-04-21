@@ -62,10 +62,6 @@ enum _:Settings
 
 new const g_eItems[][Items] = 
 {
-	/*
-		* You can rearange the items from this section.
-	*/
-	
 	{ "health", "+50 Health Points", 1500, 5, "items/smallmedkit1.wav" },
 	{ "armor", "+100 Armor Points", 1000, 8, "items/ammopickup2.wav" },
 	{ "unlclip", "Unlimited Clip", 3000, 3, DEFAULT_SOUND },
@@ -173,7 +169,7 @@ public cshop_item_selected(id, iItem)
 		if(!weapon_uses_ammo(iWeapon))
 		{
 			new szName[64]
-			cshop_get_name(DEFAULT_ITEMS[ITEM_UNLCLIP], szName, charsmax(szName))
+			cshop_get_item_data(DEFAULT_ITEMS[ITEM_UNLCLIP], CSHOP_DATA_NAME, szName, charsmax(szName))
 			CC_SendMessage(id, "%L", id, "CSHOP_CANT_ACTIVATE", szName)
 			cshop_error_sound(id)
 			return DONT_BUY
@@ -189,7 +185,7 @@ public cshop_item_selected(id, iItem)
 		if(!weapon_uses_ammo(iWeapon))
 		{
 			new szName[64]
-			cshop_get_name(DEFAULT_ITEMS[ITEM_UNLAMMO], szName, charsmax(szName))
+			cshop_get_item_data(DEFAULT_ITEMS[ITEM_UNLCLIP], CSHOP_DATA_NAME, szName, charsmax(szName))
 			CC_SendMessage(id, "%L", id, "CSHOP_CANT_ACTIVATE", szName)
 			cshop_error_sound(id)
 			return DONT_BUY
@@ -267,7 +263,7 @@ public RegenerateHealth(id)
 	static iHealth
 	iHealth = get_user_health(id)
 	
-	if(iHealth == g_eSettings[HealthRegen_MaxHP])
+	if(iHealth >= g_eSettings[HealthRegen_MaxHP])
 		return
 		
 	set_user_health(id, clamp(iHealth + g_eSettings[HealthRegen_PerSec], .max = g_eSettings[HealthRegen_MaxHP]))
@@ -286,7 +282,7 @@ public RegenerateArmor(id)
 	static iArmor
 	iArmor = get_user_armor(id)
 	
-	if(iArmor == g_eSettings[ArmorRegen_MaxAP])
+	if(iArmor >= g_eSettings[ArmorRegen_MaxAP])
 		return
 		
 	set_user_armor(id, clamp(iArmor + g_eSettings[ArmorRegen_PerSec], .max = g_eSettings[ArmorRegen_MaxAP]))

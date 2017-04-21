@@ -1,13 +1,13 @@
 #include <amxmodx>
 #include <amxmisc>
 #include <cromchat>
-#include <cshop_settings>
+#include <customshop>
 #include <formatin>
 #include <fun>
 #include <hamsandwich>
 #include <nvault>
 
-#define PLUGIN_VERSION "4.0"
+#define PLUGIN_VERSION "4.1"
 #define TASK_HUDBAR 388838
 #define mtop(%1) floatround(float(%1) / 10.0, floatround_floor)
 #define nvault_clear(%1) nvault_prune(%1, 0, get_systime() + 1)
@@ -115,7 +115,7 @@ enum
 	ST_INT = 0,
 	ST_FLOAT,
 	ST_STRING
-}	
+}
 
 new const g_szVaults[][] = { "CustomShop", "CustomShopIP", "CustomShopSI" }
 
@@ -149,6 +149,7 @@ new bool:g_bHasItem[33][MAX_ITEMS],
 	g_fwdSelectItem,
 	g_fwdRemoveItem,
 	g_fwdMenuOpened,
+	g_fwdSetPrice,
 	g_iVault,
 	g_iHUD
 
@@ -175,6 +176,7 @@ public plugin_init()
 	g_fwdSelectItem = CreateMultiForward("cshopItemBought", ET_STOP, FP_CELL, FP_CELL)
 	g_fwdRemoveItem = CreateMultiForward("cshopItemRemoved", ET_IGNORE, FP_CELL, FP_CELL)
 	g_fwdMenuOpened = CreateMultiForward("cshop_menu_opened", ET_STOP, FP_CELL)
+	g_fwdSetPrice = CreateMultiForward("cshop_set_price", ET_STOP, FP_CELL, FP_CELL, FP_CELL)
 	
 	formatex(g_szItemsFile, charsmax(g_szItemsFile), "%s/CustomShopItems.ini", g_szConfigsName)
 	formatex(g_szStatus[0], charsmax(g_szStatus[]), "%L", LANG_SERVER, "CSHOP_DISABLED")
@@ -235,6 +237,11 @@ public plugin_end()
 	
 	if(g_eSettings[CSHOP_POINTS_ENABLE] && g_eSettings[CSHOP_POINTS_SAVE])
 		nvault_close(g_iVault)
+		
+	DestroyForward(g_fwdSelectItem)
+	DestroyForward(g_fwdRemoveItem)
+	DestroyForward(g_fwdMenuOpened)
+	DestroyForward(g_fwdSetPrice)
 }
 
 loadItems(iWrite)
@@ -472,7 +479,7 @@ readSettings()
 						while(szValue[0] != 0 && strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ','))
 						{
 							trim(szKey); trim(szValue)
-							register_clcmd(szKey, "menuShop")
+							register_clcmd(szKey, "Menu_Shop")
 						}
 					}
 					else if(equal(szKey, "CSHOP_FLAG"))
@@ -498,7 +505,7 @@ readSettings()
 						while(szValue[0] != 0 && strtok(szValue, szKey, charsmax(szKey), szValue, charsmax(szValue), ','))
 						{
 							trim(szKey); trim(szValue)
-							register_clcmd(szKey, "cmdPoints")
+							register_clcmd(szKey, "Cmd_Points")
 						}
 					}
 					else if(equal(szKey, "CSHOP_SHOW_TEAMED"))
@@ -557,7 +564,7 @@ public client_disconnect(id)
 		TrieSetArray(g_tLimit, g_szInfo[id], g_iLimit[id], sizeof(g_iLimit[]))
 		
 	if(g_eSettings[CSHOP_POINTS_ENABLE] && g_eSettings[CSHOP_POINTS_SAVE])
-		nvault_read(id, 0, g_szInfo[id])
+		use_vault(id, 0, g_szInfo[id])
 }
 	
 public client_putinserver(id)
@@ -579,7 +586,7 @@ public client_putinserver(id)
 			set_task(1.0, "showHUD", id + TASK_HUDBAR, _, _, "b")
 		
 		if(g_eSettings[CSHOP_POINTS_SAVE])
-			nvault_read(id, 1, g_szInfo[id])
+			use_vault(id, 1, g_szInfo[id])
 	}
 }
 
@@ -594,15 +601,15 @@ public client_infochanged(id)
 	
 	if(!equal(szNewName, szOldName))
 	{
-		nvault_read(id, 0, szOldName)
-		nvault_read(id, 1, szNewName)
+		use_vault(id, 0, szOldName)
+		use_vault(id, 1, szNewName)
 		
 		if(!g_eSettings[CSHOP_SAVE_TYPE])
 			get_user_saveinfo(id)
 	}
 }
 
-nvault_read(id, iType, szInfo[])
+use_vault(id, iType, szInfo[])
 {
 	if(is_blank(szInfo))
 		return
@@ -664,7 +671,7 @@ public OnPlayerSpawn(id)
 	}
 	
 	if(g_eSettings[CSHOP_OPEN_AT_SPAWN] && has_access_flag(id) && has_access_team(id) && is_user_alive(id))
-		menuShop(id)
+		Menu_Shop(id)
 }
 
 public OnPlayerKilled()
@@ -707,7 +714,7 @@ public OnPlayerKilled()
 	}
 }
 
-public cmdPoints(id)
+public Cmd_Points(id)
 {
 	CC_SendMessage(id, g_eSettings[CSHOP_POINTS_ENABLE] ? formatin("%L", id, "CSHOP_POINTS", g_iPoints[id], g_eSettings[CSHOP_CURRENCY]) : formatin("%L", id, "CSHOP_POINTS_DISABLED"))	
 	return PLUGIN_HANDLED
@@ -797,7 +804,7 @@ public Cmd_ListItems(id, iLevel, iCid)
 	return PLUGIN_HANDLED
 }
 
-public menuShop(id)
+public Menu_Shop(id)
 {
 	static iReturn
 	ExecuteForward(g_fwdMenuOpened, iReturn, id)
@@ -838,7 +845,7 @@ public menuShop(id)
 		}
 	}
 	
-	static szTitle[256], szItem[128], szKey[5], eItem[Items], iMoney
+	static szTitle[256], szItem[128], szData[10], eItem[Items], iMoney
 	iMoney = g_eSettings[CSHOP_POINTS_ENABLE] ? g_iPoints[id] : get_user_money(id)
 	
 	copy(szTitle, charsmax(szTitle), g_eSettings[CSHOP_TITLE])
@@ -853,8 +860,8 @@ public menuShop(id)
 		replace_all(szTitle, charsmax(szTitle), g_szFields[FIELD_MONEY], szMoney)
 	}
 		
-	static iMenu, iUserLimit, i
-	iMenu = menu_create(szTitle, "handlerShop")
+	static iMenu, iUserLimit, iPrice, i
+	iMenu = menu_create(szTitle, "Shop_Handler")
 	
 	for(i = 0; i < g_iTotalItems; i++)
 	{
@@ -889,17 +896,25 @@ public menuShop(id)
 		
 		if(g_eSettings[CSHOP_HIDE_LIMITED] && (eItem[Limit] && iUserLimit == eItem[Limit]))
 			continue
+			
+		ExecuteForward(g_fwdSetPrice, iReturn, id, i, eItem[Price])
+		
+		if(iReturn)
+			iPrice = iReturn
+		else
+			iPrice = eItem[Price]
 		
 		if(eItem[Limit])
 			formatex(szItem, charsmax(szItem), "%s%s \r[\y%i%s\r] [\y%i\r/\y%i\r]", 
-			(iMoney >= eItem[Price] && iUserLimit < eItem[Limit]) ? "" : "\d", eItem[Name], eItem[Price], g_eSettings[CSHOP_CURRENCY], iUserLimit, eItem[Limit])
+			(iMoney >= iPrice && iUserLimit < eItem[Limit]) ? "" : "\d", eItem[Name], iPrice, g_eSettings[CSHOP_CURRENCY], iUserLimit, eItem[Limit])
 		else
 			formatex(szItem, charsmax(szItem), "%s%s \r[\y%i%s\r]", 
-			(iMoney >= eItem[Price]) ? "" : "\d", eItem[Name], eItem[Price], g_eSettings[CSHOP_CURRENCY])
+			(iMoney >= iPrice) ? "" : "\d", eItem[Name], iPrice, g_eSettings[CSHOP_CURRENCY])
 		
 		@ADD_ITEM:
-		num_to_str(i, szKey, charsmax(szKey))
-		menu_additem(iMenu, szItem, szKey)
+		num_to_str(i, szData, charsmax(szData))
+		add(szData, charsmax(szData), formatin(" %i", iPrice))
+		menu_additem(iMenu, szItem, szData)
 	}
 	
 	static iPages
@@ -928,7 +943,7 @@ public menuShop(id)
 	return PLUGIN_HANDLED
 }
 
-public handlerShop(id, iMenu, iItem)
+public Shop_Handler(id, iMenu, iItem)
 {
 	if(iItem == MENU_EXIT || !is_user_alive(id))
 		goto @DESTROY_SHOP
@@ -938,10 +953,12 @@ public handlerShop(id, iMenu, iItem)
 	
 	if(iReturn == PLUGIN_HANDLED)
 		goto @DESTROY_SHOP
-	
-	static szKey[6], iUnused, iKey
-	menu_item_getinfo(iMenu, iItem, iUnused, szKey, charsmax(szKey), .callback = iUnused)
+		
+	static szData[10], szPrice[7], szKey[3], iUnused, iPrice, iKey
+	menu_item_getinfo(iMenu, iItem, iUnused, szData, charsmax(szData), .callback = iUnused)
+	parse(szData, szKey, charsmax(szKey), szPrice, charsmax(szPrice))
 	iKey = str_to_num(szKey)
+	iPrice = str_to_num(szPrice)
 	
 	static eItem[Items], iMoney, iUserLimit
 	iMoney = g_eSettings[CSHOP_POINTS_ENABLE] ? g_iPoints[id] : get_user_money(id)
@@ -958,9 +975,9 @@ public handlerShop(id, iMenu, iItem)
 		CC_SendMessage(id, "%L", id, "CSHOP_NOT_FLAG")
 		play_error_sound(id)
 	}
-	else if(iMoney < eItem[Price])
+	else if(iMoney < iPrice)
 	{
-		CC_SendMessage(id, "%L", id, "CSHOP_NOT_MONEY", g_eSettings[CSHOP_MONEY_NAME], iMoney, eItem[Price], g_eSettings[CSHOP_CURRENCY])
+		CC_SendMessage(id, "%L", id, "CSHOP_NOT_MONEY", g_eSettings[CSHOP_MONEY_NAME], iMoney, iPrice, g_eSettings[CSHOP_CURRENCY])
 		play_error_sound(id)
 	}
 	else if(eItem[Limit] && (iUserLimit == eItem[Limit]))
@@ -973,7 +990,7 @@ public handlerShop(id, iMenu, iItem)
 		CC_SendMessage(id, "%L", id, "CSHOP_NOT_DELAY", eItem[Duration])
 		play_error_sound(id)
 	}
-	else buyItem(id, iKey)
+	else buyItem(id, iKey, iPrice)
 	
 	@DESTROY_SHOP:
 	menu_destroy(iMenu)
@@ -1166,7 +1183,7 @@ public Cmd_Edit(id)
 	return PLUGIN_HANDLED
 }
 
-buyItem(id, iItem)
+buyItem(id, iItem, iPrice)
 {
 	static iReturn
 	ExecuteForward(g_fwdSelectItem, iReturn, id, iItem)
@@ -1178,11 +1195,11 @@ buyItem(id, iItem)
 	ArrayGetArray(g_aItems, iItem, eItem)
 	
 	if(g_eSettings[CSHOP_POINTS_ENABLE])
-		g_iPoints[id] -= eItem[Price]
+		g_iPoints[id] -= iPrice
 	else
-		take_user_money(id, eItem[Price])
+		take_user_money(id, iPrice)
 		
-	CC_SendMessage(id, "%L", id, "CSHOP_ITEM_BOUGHT", eItem[Name], eItem[Price], g_eSettings[CSHOP_CURRENCY])
+	CC_SendMessage(id, "%L", id, "CSHOP_ITEM_BOUGHT", eItem[Name], iPrice, g_eSettings[CSHOP_CURRENCY])
 	
 	switch(g_eSettings[CSHOP_BUYSOUND_TYPE])
 	{
@@ -1228,6 +1245,9 @@ public autoRemoveItem(iArray[2])
 		}
 	}
 }
+
+/*public Disable_Item(id, iMenu, iItem)
+	return ITEM_DISABLED*/
 
 get_user_saveinfo(id)
 {
@@ -1299,7 +1319,8 @@ public plugin_natives()
 	register_native("cshop_get_int", "_cshop_get_int")	
 	register_native("cshop_get_float", "_cshop_get_float")	
 	register_native("cshop_get_string", "_cshop_get_string")
-	register_native("cshop_get_name", "_cshop_get_name")
+	register_native("cshop_find_item_by_id", "_cshop_find_item_by_id")
+	register_native("cshop_get_item_data", "_cshop_get_item_data")
 }
 
 public _cshop_register_item(iPlugin, iParams)
@@ -1367,7 +1388,7 @@ public _cshop_get_prefix(iPlugin, iParams)
 	set_string(1, CC_PREFIX, get_param(2))
 	
 public _cshop_open(iPlugin, iParams)
-	menuShop(get_param(1))
+	Menu_Shop(get_param(1))
 	
 public _cshop_set_int(iPlugin, iParams)
 {
@@ -1407,6 +1428,13 @@ public _cshop_set_string(iPlugin, iParams)
 	eItem[SettingsNum]++
 	ArrayPushString(eItem[aSettings], szSetting)
 	ArraySetArray(g_aItems, iItem, eItem)
+	
+	/*switch(iType)
+	{
+		case CSHOP_PRECACHE_GENERIC: precache_generic(szValue)
+		case CSHOP_PRECACHE_MODEL: precache_model(szValue)
+		case CSHOP_PRECACHE_SOUND: precache_sound(szValue)
+	}*/
 }
 
 public _cshop_get_int(iPlugin, iParams)
@@ -1439,9 +1467,35 @@ public _cshop_get_string(iPlugin, iParams)
 	set_string(3, szValue, get_param(4))
 }
 
-public _cshop_get_name(iPlugin, iParams)
+public _cshop_find_item_by_id(iPlugin, iParams)
+{
+	static szItem[32], id
+	get_string(1, szItem, charsmax(szItem))
+	
+	if(!TrieKeyExists(g_tItemIds, szItem))
+		return -1
+		
+	id = TrieGetCell(g_tItemIds, szItem, id)
+	return id
+}
+
+public any:_cshop_get_item_data(iPlugin, iParams)
 {
 	static eItem[Items]
 	ArrayGetArray(g_aItems, get_param(1), eItem)
-	set_string(2, eItem[Name], get_param(3))
+	
+	switch(get_param(2))
+	{
+		case CSHOP_DATA_ID: set_string(3, eItem[Id], get_param(4))
+		case CSHOP_DATA_NAME: set_string(3, eItem[Name], get_param(4))
+		case CSHOP_DATA_PRICE: return eItem[Price]
+		case CSHOP_DATA_LIMIT: return eItem[Limit]
+		case CSHOP_DATA_SOUND: set_string(3, eItem[Sound], get_param(4))
+		case CSHOP_DATA_DURATION: return eItem[Duration]
+		case CSHOP_DATA_TEAM: return eItem[Team]
+		case CSHOP_DATA_FLAGS: set_string(3, eItem[Flags], get_param(4))
+		default: return -1
+	}
+	
+	return 1
 }
