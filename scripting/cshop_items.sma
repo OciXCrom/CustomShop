@@ -185,7 +185,7 @@ public cshop_item_selected(id, iItem)
 		if(!weapon_uses_ammo(iWeapon))
 		{
 			new szName[64]
-			cshop_get_item_data(DEFAULT_ITEMS[ITEM_UNLCLIP], CSHOP_DATA_NAME, szName, charsmax(szName))
+			cshop_get_item_data(DEFAULT_ITEMS[ITEM_UNLAMMO], CSHOP_DATA_NAME, szName, charsmax(szName))
 			CC_SendMessage(id, "%L", id, "CSHOP_CANT_ACTIVATE", szName)
 			cshop_error_sound(id)
 			return DONT_BUY
