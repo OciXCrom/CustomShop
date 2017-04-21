@@ -11,7 +11,7 @@
 #include <fun>
 #include <hamsandwich>
 
-#define PLUGIN_VERSION "4.x"
+#define PLUGIN_VERSION "4.1+"
 #define TASK_HEALTHREGEN 400040
 #define TASK_ARMORREGEN 400140
 #define m_pActiveItem 373
