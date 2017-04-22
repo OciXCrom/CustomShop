@@ -21,7 +21,7 @@ additem DEFAULT_ITEMS[MAX_ITEMS]
 enum
 {
 	ITEM_HEALTH = 0, ITEM_ARMOR, ITEM_UNLCLIP, ITEM_UNLAMMO, ITEM_BOMBER, ITEM_SILENTSTEPS, ITEM_SPEED, ITEM_GRAVITY, ITEM_CHAMELEON, ITEM_DRUGS, ITEM_TRANSPARENCY,
-	ITEM_INVIS, ITEM_DOUBLEDAMAGE, ITEM_GODMODE, ITEM_HEALTHREGEN, ITEM_ARMORREGEN, ITEM_AWP
+	ITEM_INVIS, ITEM_MOREDAMAGE, ITEM_GODMODE, ITEM_HEALTHREGEN, ITEM_ARMORREGEN, ITEM_AWP
 }
 
 enum _:Items
@@ -50,7 +50,7 @@ enum _:Settings
 	Float:Drugs_Speed,
 	Transparency_Amount,
 	Invis_Amount,
-	DoubleDamage_Multiplier,
+	MoreDamage_Amount[10],
 	HealthRegen_PerSec,
 	HealthRegen_MaxHP,
 	Float:HealthRegen_Frequency,
@@ -74,7 +74,7 @@ new const g_eItems[][Items] =
 	{ "drugs", "Drugs (Speed + Health)", 8000, 2, DEFAULT_SOUND },
 	{ "transparency", "Transparency", 2500, 1, DEFAULT_SOUND },
 	{ "invis", "Invisibility (15 Seconds)", 16000, 1, "hornet/ag_buzz1.wav", 15.0 },
-	{ "doubledamage", "Double Damage", 10000, 1, DEFAULT_SOUND },
+	{ "moredamage", "Double Damage", 10000, 1, DEFAULT_SOUND },
 	{ "godmode", "Godmode (5 Seconds)", 16000, 1, "misc/stinger12.wav", 5.0 },
 	{ "healthregen", "Health Regeneration", 1800, 1, "items/suitchargeok1.wav" },
 	{ "armorregen", "Armor Regeneration", 2000, 1, "items/suitchargeok1.wav" },
@@ -112,7 +112,7 @@ public plugin_init()
 	g_eSettings[Drugs_Speed] = _:cshop_get_float(DEFAULT_ITEMS[ITEM_DRUGS], "Speed")
 	g_eSettings[Transparency_Amount] = cshop_get_int(DEFAULT_ITEMS[ITEM_TRANSPARENCY], "Amount")
 	g_eSettings[Invis_Amount] = cshop_get_int(DEFAULT_ITEMS[ITEM_INVIS], "Amount")
-	g_eSettings[DoubleDamage_Multiplier] = cshop_get_int(DEFAULT_ITEMS[ITEM_DOUBLEDAMAGE], "Multiplier")
+	cshop_get_string(DEFAULT_ITEMS[ITEM_MOREDAMAGE], "Amount", g_eSettings[MoreDamage_Amount], charsmax(g_eSettings[MoreDamage_Amount]))
 	g_eSettings[HealthRegen_PerSec] = cshop_get_int(DEFAULT_ITEMS[ITEM_HEALTHREGEN], "HP Per Second")
 	g_eSettings[HealthRegen_MaxHP] = cshop_get_int(DEFAULT_ITEMS[ITEM_HEALTHREGEN], "Max HP")
 	g_eSettings[HealthRegen_Frequency] = _:cshop_get_float(DEFAULT_ITEMS[ITEM_HEALTHREGEN], "Frequency")
@@ -140,7 +140,7 @@ public plugin_precache()
 	cshop_set_float(DEFAULT_ITEMS[ITEM_DRUGS], "Speed", 300.0)
 	cshop_set_int(DEFAULT_ITEMS[ITEM_TRANSPARENCY], "Amount", 75)
 	cshop_set_int(DEFAULT_ITEMS[ITEM_INVIS], "Amount", 0)
-	cshop_set_int(DEFAULT_ITEMS[ITEM_DOUBLEDAMAGE], "Multiplier", 2)
+	cshop_set_string(DEFAULT_ITEMS[ITEM_MOREDAMAGE], "Amount", "*2")
 	cshop_set_int(DEFAULT_ITEMS[ITEM_HEALTHREGEN], "HP Per Second", 1)
 	cshop_set_int(DEFAULT_ITEMS[ITEM_HEALTHREGEN], "Max HP", 150)
 	cshop_set_float(DEFAULT_ITEMS[ITEM_HEALTHREGEN], "Frequency", 0.5)
@@ -207,7 +207,7 @@ public cshop_item_selected(id, iItem)
 	}
 	else if(iItem == DEFAULT_ITEMS[ITEM_TRANSPARENCY]) 		{ set_user_glow(id, .iAlpha = g_eSettings[Transparency_Amount]); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_INVIS]) 			{ set_user_glow(id, .iAlpha = g_eSettings[Invis_Amount]); }
-	else if(iItem == DEFAULT_ITEMS[ITEM_DOUBLEDAMAGE]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_DOUBLEDAMAGE]] = true; }
+	else if(iItem == DEFAULT_ITEMS[ITEM_MOREDAMAGE]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_MOREDAMAGE]] = true; }
 	else if(iItem == DEFAULT_ITEMS[ITEM_GODMODE]) 			{ set_user_godmode(id, 1); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_HEALTHREGEN]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_HEALTHREGEN]] = true; set_task(g_eSettings[HealthRegen_Frequency], "RegenerateHealth", id + TASK_HEALTHREGEN, .flags = "b"); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_ARMORREGEN]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_ARMORREGEN]] = true; set_task(g_eSettings[ArmorRegen_Frequency], "RegenerateArmor", id + TASK_ARMORREGEN, .flags = "b"); }
@@ -227,7 +227,7 @@ public cshop_item_removed(id, iItem)
 	else if(iItem == DEFAULT_ITEMS[ITEM_CHAMELEON]) 		{ cs_reset_user_model(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_DRUGS]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]] = false; OnChangeWeapon(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_INVIS]) 			{ remove_user_glow(id); }
-	else if(iItem == DEFAULT_ITEMS[ITEM_DOUBLEDAMAGE]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_DOUBLEDAMAGE]] = false; }
+	else if(iItem == DEFAULT_ITEMS[ITEM_MOREDAMAGE]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_MOREDAMAGE]] = false; }
 	else if(iItem == DEFAULT_ITEMS[ITEM_GODMODE]) 			{ set_user_godmode(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_HEALTHREGEN]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_HEALTHREGEN]] = false; }
 	else if(iItem == DEFAULT_ITEMS[ITEM_ARMORREGEN]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_ARMORREGEN]] = false; }
@@ -245,8 +245,8 @@ public PreTakeDamage(iVictim, iInflictor, iAttacker, Float:flDamage, iDamageBits
 {
 	if(is_user_alive(iAttacker) && iAttacker != iVictim)
 	{
-		if(g_bHasItem[iAttacker][DEFAULT_ITEMS[ITEM_DOUBLEDAMAGE]])
-			SetHamParamFloat(4, flDamage * g_eSettings[DoubleDamage_Multiplier])
+		if(g_bHasItem[iAttacker][DEFAULT_ITEMS[ITEM_MOREDAMAGE]])
+			SetHamParamFloat(4, math_add_f(flDamage, g_eSettings[MoreDamage_Amount]))
 	}
 }
 
@@ -287,6 +287,38 @@ public RegenerateArmor(id)
 		
 	set_user_armor(id, clamp(iArmor + g_eSettings[ArmorRegen_PerSec], .max = g_eSettings[ArmorRegen_MaxAP]))
 }
+
+Float:math_add_f(Float:fNum, const szMath[])
+{
+    static szNewMath[16], Float:fMath, bool:bPercent, cOperator
+   
+    copy(szNewMath, charsmax(szNewMath), szMath)
+    bPercent = szNewMath[strlen(szNewMath) - 1] == '%'
+    cOperator = szNewMath[0]
+   
+    if(!isdigit(szNewMath[0]))
+        szNewMath[0] = ' '
+   
+    if(bPercent)
+        replace(szNewMath, charsmax(szNewMath), "%", "")
+       
+    trim(szNewMath)
+    fMath = str_to_float(szNewMath)
+   
+    if(bPercent)
+        fMath *= fNum / 100
+       
+    switch(cOperator)
+    {
+        case '+': fNum += fMath
+        case '-': fNum -= fMath
+        case '/': fNum /= fMath
+        case '*': fNum *= fMath
+        default: fNum = fMath
+    }
+   
+    return fNum
+}  
 
 bool:weapon_uses_ammo(iWeapon)
 	return (iWeapon == CSW_KNIFE|CSW_HEGRENADE|CSW_FLASHBANG|CSW_SMOKEGRENADE) ? false : true
