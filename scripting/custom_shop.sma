@@ -7,7 +7,7 @@
 #include <hamsandwich>
 #include <nvault>
 
-#define PLUGIN_VERSION "4.1"
+#define PLUGIN_VERSION "4.1a"
 #define TASK_HUDBAR 388838
 #define mtop(%1) floatround(float(%1) / 10.0, floatround_floor)
 #define nvault_clear(%1) nvault_prune(%1, 0, get_systime() + 1)
@@ -164,7 +164,7 @@ public plugin_init()
 	
 	if(g_eSettings[CSHOP_POINTS_ENABLE])
 	{
-		register_event("DeathMsg", "OnPlayerKilled", "a", "1>0", "2>0", "1!2")
+		register_event("DeathMsg", "OnPlayerKilled", "a")
 		register_concmd("cshop_points", "Cmd_GivePoints", FLAG_ADMIN, "<nick|#userid> <points to give/take>")
 		register_concmd("cshop_reset_points", "Cmd_ResetPoints", FLAG_ADMIN, "-- resets all points")
 	}
@@ -679,6 +679,9 @@ public OnPlayerKilled()
 	static iAttacker, iVictim
 	iAttacker = read_data(1)
 	iVictim = read_data(2)
+	
+	if(!is_user_connected(iAttacker) || iAttacker == iVictim || !is_user_connected(iVictim))
+		return
 	
 	if(!has_access_flag(iAttacker))
 		return
