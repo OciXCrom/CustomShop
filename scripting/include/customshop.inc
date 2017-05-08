@@ -147,7 +147,7 @@ native cshopGivePoints(id, points)
  * @param id 			Player's index.
  * @return 				Player's points.
  */
-native cshopGetPoints(id, points)
+native cshopGetPoints(id)
 #define cshop_get_points cshopGetPoints
 
 /** 
@@ -165,7 +165,7 @@ native cshop_get_prefix(prefix[], len)
  * @param id 			Player's id.
  * @noreturn
  */
-native cshop_open(prefix[], len)
+native cshop_open(id)
 
 /** 
  * Registers an integer setting for a specific item.
