@@ -321,7 +321,7 @@ Float:math_add_f(Float:fNum, const szMath[])
 }  
 
 bool:weapon_uses_ammo(iWeapon)
-	return (iWeapon == CSW_KNIFE|CSW_HEGRENADE|CSW_FLASHBANG|CSW_SMOKEGRENADE) ? false : true
+	return (iWeapon == CSW_KNIFE|CSW_HEGRENADE|CSW_FLASHBANG|CSW_SMOKEGRENADE|C4) ? false : true
 
 set_user_glow(id, iRed = 0, iGreen = 0, iBlue = 0, iAlpha)
 	set_user_rendering(id, kRenderFxGlowShell, iRed, iGreen, iBlue, kRenderTransAlpha, iAlpha)
