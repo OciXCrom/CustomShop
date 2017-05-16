@@ -7,7 +7,7 @@
 #include <hamsandwich>
 #include <nvault>
 
-#define PLUGIN_VERSION "4.1a"
+#define PLUGIN_VERSION "4.1b"
 #define TASK_HUDBAR 388838
 #define mtop(%1) floatround(float(%1) / 10.0, floatround_floor)
 #define nvault_clear(%1) nvault_prune(%1, 0, get_systime() + 1)
@@ -758,15 +758,14 @@ public Cmd_ResetPoints(id, iLevel, iCid)
 {
 	if(!cmd_access(id, iLevel, iCid, 1))
 		return PLUGIN_HANDLED
-
-	new szName[32]
-	get_user_name(id, szName, charsmax(szName))
 	
 	if(g_eSettings[CSHOP_POINTS_SAVE])
 		nvault_clear(g_iVault)
 	
-	arrayset(g_iPoints, 0, sizeof(g_iPoints[]))	
-	CC_LogMessage(0, _, "%L", LANG_PLAYER, "CSHOP_POINTS_RESET")
+	new szName[32]
+	get_user_name(id, szName, charsmax(szName))
+	arrayset(g_iPoints, 0, sizeof(g_iPoints))
+	CC_LogMessage(0, _, "%L", LANG_PLAYER, "CSHOP_POINTS_RESET", szName)
 	return PLUGIN_HANDLED
 }
 
