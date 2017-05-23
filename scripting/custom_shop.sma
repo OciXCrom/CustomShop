@@ -7,7 +7,7 @@
 #include <hamsandwich>
 #include <nvault>
 
-#define PLUGIN_VERSION "4.1b"
+#define PLUGIN_VERSION "4.1c"
 #define TASK_HUDBAR 388838
 #define mtop(%1) floatround(float(%1) / 10.0, floatround_floor)
 #define nvault_clear(%1) nvault_prune(%1, 0, get_systime() + 1)
@@ -357,8 +357,7 @@ loadItems(iWrite)
 					fprintf(iFilePointer, "^n%s: %s", g_szOptions[OPTION_NAME], eItem[Name])
 					fprintf(iFilePointer, "^n%s: %i", g_szOptions[OPTION_PRICE], eItem[Price])
 					
-					if(eItem[Limit])
-						fprintf(iFilePointer, "^n%s: %i", g_szOptions[OPTION_LIMIT], eItem[Limit])
+					fprintf(iFilePointer, "^n%s: %i", g_szOptions[OPTION_LIMIT], eItem[Limit])
 						
 					if(!equal(eItem[Sound], DEFAULT_SOUND))
 						fprintf(iFilePointer, "^n%s: %s", g_szOptions[OPTION_SOUND], eItem[Sound])
