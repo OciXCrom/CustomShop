@@ -14,10 +14,19 @@
 
 #define CromChat CC_SendMessage
 
-#define CC_VERSION 1.1
+#define CC_VERSION 1.2
 #define CC_MAX_TEAM_SIZE 10
+#define CC_MAX_PLAYERS 32
 #define CC_MAX_PREFIX_SIZE 64
 #define CC_MAX_MESSAGE_SIZE 188
+
+enum
+{
+	CC_COLOR_TEAM = 0,
+	CC_COLOR_GREY = -1,
+	CC_COLOR_BLUE = -2,
+	CC_COLOR_RED = -3
+}
 
 new CC_PREFIX[CC_MAX_PREFIX_SIZE], bool:CC_FIRST_TIME = true, CC_MSG_SAYTEXT, CC_MSG_TEAMINFO
 new const CC_REPLACE_COLORS[][] = { "&x04", "^x04", "&x03", "^x03", "&x01", "^x01" }
@@ -25,10 +34,10 @@ new const CC_PLUS_COLORS[][] = { "&x07", "TERRORIST", "&x06", "CT", "&x05", "SPE
 new const CC_COLORS_LIST[][] = { "&x07", "&x06", "&x05", "&x04", "&x03", "&x01", "&x00" }
 new const CC_MENU_COLORS[][] = { "\y", "\r", "\w", "\d", "\R" }
 new const CC_NO_PREFIX[] = "&x00"
-
+	
 stock CC_SendMessage(const id, const szInput[], any:...)
 {
-	static iPlayers[32], iPnum
+	static iPlayers[CC_MAX_PLAYERS], iPnum
 	
 	if(id)
 	{
@@ -82,6 +91,36 @@ stock CC_SendMessage(const id, const szInput[], any:...)
 	}
 	
 	return strlen(szMessage)
+}
+
+stock CC_SendMatched(const id, const iPlayer, const szInput[], any:...)
+{
+	static szMessage[CC_MAX_MESSAGE_SIZE]
+	vformat(szMessage[1], charsmax(szMessage), szInput, 4)
+	szMessage[0] = 0x01
+	
+	static iColor
+	
+	if(is_user_connected(iPlayer))
+	{
+		switch(get_user_team(iPlayer))
+		{
+			case 1: iColor = CC_COLOR_RED
+			case 2: iColor = CC_COLOR_BLUE
+			default: iColor = CC_COLOR_GREY
+		}
+	}
+	else
+		iColor = iPlayer
+		
+	switch(iColor)
+	{
+		case CC_COLOR_RED: add(szMessage, charsmax(szMessage), CC_COLORS_LIST[0])
+		case CC_COLOR_BLUE: add(szMessage, charsmax(szMessage), CC_COLORS_LIST[1])
+		case CC_COLOR_GREY: add(szMessage, charsmax(szMessage), CC_COLORS_LIST[2])
+	}
+	
+	return CC_SendMessage(id, szMessage)
 }
 
 stock CC_LogMessage(const id, const szFile[] = "", const szInput[], any:...)
