@@ -133,11 +133,11 @@ public plugin_precache()
 	cshop_set_int(DEFAULT_ITEMS[ITEM_UNLAMMO], "Backpack Ammo", 97280)
 	cshop_set_int(DEFAULT_ITEMS[ITEM_BOMBER], "Amount", 20)
 	cshop_set_string(DEFAULT_ITEMS[ITEM_BOMBER], "Type", "weapon_hegrenade")
-	cshop_set_float(DEFAULT_ITEMS[ITEM_SPEED], "Amount", 300.0)
+	cshop_set_float(DEFAULT_ITEMS[ITEM_SPEED], "Amount", 50.0)
 	cshop_set_float(DEFAULT_ITEMS[ITEM_GRAVITY], "Amount", 0.5)
 	cshop_set_int(DEFAULT_ITEMS[ITEM_DRUGS], "Health", 200)
 	cshop_set_int(DEFAULT_ITEMS[ITEM_DRUGS], "FOV", 180)
-	cshop_set_float(DEFAULT_ITEMS[ITEM_DRUGS], "Speed", 300.0)
+	cshop_set_float(DEFAULT_ITEMS[ITEM_DRUGS], "Speed", 50.0)
 	cshop_set_int(DEFAULT_ITEMS[ITEM_TRANSPARENCY], "Amount", 75)
 	cshop_set_int(DEFAULT_ITEMS[ITEM_INVIS], "Amount", 0)
 	cshop_set_string(DEFAULT_ITEMS[ITEM_MOREDAMAGE], "Amount", "*2")
@@ -194,14 +194,14 @@ public cshop_item_selected(id, iItem)
 		cs_set_user_bpammo(id, iWeapon, g_eSettings[UnlAmmo_Ammo])
 	}
 	else if(iItem == DEFAULT_ITEMS[ITEM_SILENTSTEPS]) 		{ set_user_footsteps(id); }
-	else if(iItem == DEFAULT_ITEMS[ITEM_SPEED]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]] = true; set_user_maxspeed(id, g_eSettings[Speed_Amount]); OnChangeWeapon(id); }
+	else if(iItem == DEFAULT_ITEMS[ITEM_SPEED]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]] = true; set_user_maxspeed(id, get_user_maxspeed(id) + g_eSettings[Speed_Amount]); OnChangeWeapon(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_GRAVITY]) 			{ set_user_gravity(id, g_eSettings[Gravity_Amount]); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_CHAMELEON]) 		{ cs_set_user_model(id, CHAMELEON_MODELS[(get_user_team(id) - 1)][random(4)]); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_DRUGS])
 	{
 		g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]] = true
 		set_user_health(id, get_user_health(id) + g_eSettings[Drugs_Health])
-		set_user_maxspeed(id, g_eSettings[Drugs_Speed])
+		set_user_maxspeed(id, get_user_maxspeed(id) + g_eSettings[Drugs_Speed])
 		set_user_drugs(id, g_eSettings[Drugs_FOV])
 		OnChangeWeapon(id)
 	}
@@ -226,6 +226,7 @@ public cshop_item_removed(id, iItem)
 	else if(iItem == DEFAULT_ITEMS[ITEM_GRAVITY]) 			{ set_user_gravity(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_CHAMELEON]) 		{ cs_reset_user_model(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_DRUGS]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]] = false; OnChangeWeapon(id); }
+	else if(iItem == DEFAULT_ITEMS[ITEM_TRANSPARENCY]) 		{ remove_user_glow(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_INVIS]) 			{ remove_user_glow(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_MOREDAMAGE]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_MOREDAMAGE]] = false; }
 	else if(iItem == DEFAULT_ITEMS[ITEM_GODMODE]) 			{ set_user_godmode(id); }
@@ -236,9 +237,9 @@ public cshop_item_removed(id, iItem)
 public OnChangeWeapon(id)
 {
 	if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]])
-		set_user_maxspeed(id, g_eSettings[Drugs_Speed])
+		set_user_maxspeed(id, get_user_maxspeed(id) + g_eSettings[Drugs_Speed])
 	else if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]])
-		set_user_maxspeed(id, g_eSettings[Speed_Amount])
+		set_user_maxspeed(id, get_user_maxspeed(id) + g_eSettings[Speed_Amount])
 }
 
 public PreTakeDamage(iVictim, iInflictor, iAttacker, Float:flDamage, iDamageBits)
@@ -321,7 +322,7 @@ Float:math_add_f(Float:fNum, const szMath[])
 }  
 
 bool:weapon_uses_ammo(iWeapon)
-	return (iWeapon == CSW_KNIFE|CSW_HEGRENADE|CSW_FLASHBANG|CSW_SMOKEGRENADE|CSW_C4) ? false : true
+	return ((1 << iWeapon) & ((1 << CSW_KNIFE) | (1 << CSW_HEGRENADE) | (1 << CSW_FLASHBANG) | (1 << CSW_SMOKEGRENADE) | (1 << CSW_C4))) ? false : true
 
 set_user_glow(id, iRed = 0, iGreen = 0, iBlue = 0, iAlpha)
 	set_user_rendering(id, kRenderFxGlowShell, iRed, iGreen, iBlue, kRenderTransAlpha, iAlpha)
