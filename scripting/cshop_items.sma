@@ -194,14 +194,13 @@ public cshop_item_selected(id, iItem)
 		cs_set_user_bpammo(id, iWeapon, g_eSettings[UnlAmmo_Ammo])
 	}
 	else if(iItem == DEFAULT_ITEMS[ITEM_SILENTSTEPS]) 		{ set_user_footsteps(id); }
-	else if(iItem == DEFAULT_ITEMS[ITEM_SPEED]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]] = true; set_user_maxspeed(id, get_user_maxspeed(id) + g_eSettings[Speed_Amount]); OnChangeWeapon(id); }
+	else if(iItem == DEFAULT_ITEMS[ITEM_SPEED]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]] = true; OnChangeWeapon(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_GRAVITY]) 			{ set_user_gravity(id, g_eSettings[Gravity_Amount]); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_CHAMELEON]) 		{ cs_set_user_model(id, CHAMELEON_MODELS[(get_user_team(id) - 1)][random(4)]); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_DRUGS])
 	{
 		g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]] = true
 		set_user_health(id, get_user_health(id) + g_eSettings[Drugs_Health])
-		set_user_maxspeed(id, get_user_maxspeed(id) + g_eSettings[Drugs_Speed])
 		set_user_drugs(id, g_eSettings[Drugs_FOV])
 		OnChangeWeapon(id)
 	}
