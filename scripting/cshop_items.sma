@@ -96,7 +96,7 @@ public plugin_init()
 	register_dictionary("CustomShop.txt")
 	register_event("CurWeapon", "OnChangeWeapon", "be", "1=1")
 	RegisterHam(Ham_TakeDamage, "player", "PreTakeDamage")
-	RegisterHam(Ham_CS_Player_ResetMaxSpeed, "player", "OnPlayerResetMaxSpeed", 1) 
+	RegisterHam(Ham_Item_PreFrame, "player", "OnPlayerResetMaxSpeed", 1) 
 	
 	g_iSetFOV = get_user_msgid("SetFOV")
 	
@@ -244,6 +244,7 @@ public cshop_item_removed(id, iItem)
 
 public OnPlayerResetMaxSpeed(id)
 {
+	CromChat(id, "rest")
 	if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]])
 		set_user_maxspeed(id, g_eSettings[Drugs_Speed_Add] ? get_user_maxspeed(id) + g_eSettings[Drugs_Speed] : g_eSettings[Drugs_Speed])
 	else if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]])
