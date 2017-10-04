@@ -244,7 +244,6 @@ public cshop_item_removed(id, iItem)
 
 public OnPlayerResetMaxSpeed(id)
 {
-	CromChat(id, "rest")
 	if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]])
 		set_user_maxspeed(id, g_eSettings[Drugs_Speed_Add] ? get_user_maxspeed(id) + g_eSettings[Drugs_Speed] : g_eSettings[Drugs_Speed])
 	else if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]])
