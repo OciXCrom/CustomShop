@@ -7,7 +7,7 @@
 #include <hamsandwich>
 #include <nvault>
 
-#define PLUGIN_VERSION "4.1c"
+#define PLUGIN_VERSION "4.2"
 #define TASK_HUDBAR 388838
 #define mtop(%1) floatround(float(%1) / 10.0, floatround_floor)
 #define nvault_clear(%1) nvault_prune(%1, 0, get_systime() + 1)
@@ -63,6 +63,7 @@ enum _:Settings
 	bool:CSHOP_SAVE_LIMIT,
 	bool:CSHOP_HIDE_LIMITED,
 	bool:CSHOP_OPEN_AT_SPAWN,
+	bool:CSHOP_REOPEN_AFTER_USE,
 	CSHOP_REWARD_NORMAL,
 	CSHOP_REWARD_HEADSHOT,
 	CSHOP_REWARD_KNIFE,
@@ -145,6 +146,7 @@ new bool:g_bHasItem[33][MAX_ITEMS],
 	g_szEditSetting[33][32],
 	g_eEditArray[33][Items],
 	g_iPoints[33],
+	g_iPage[33],
 	g_iTotalItems,
 	g_fwdSelectItem,
 	g_fwdRemoveItem,
@@ -523,6 +525,8 @@ readSettings()
 						g_eSettings[CSHOP_HIDE_LIMITED] = boolclamp(szValue)
 					else if(equal(szKey, "CSHOP_OPEN_AT_SPAWN"))
 						g_eSettings[CSHOP_OPEN_AT_SPAWN] = boolclamp(szValue)
+					else if(equal(szKey, "CSHOP_REOPEN_AFTER_USE"))
+						g_eSettings[CSHOP_REOPEN_AFTER_USE] = boolclamp(szValue)
 					else if(equal(szKey, "CSHOP_REWARD_NORMAL"))
 						g_eSettings[CSHOP_REWARD_NORMAL] = str_to_num(szValue)
 					else if(equal(szKey, "CSHOP_REWARD_HEADSHOT"))
@@ -570,6 +574,9 @@ public client_putinserver(id)
 {
 	get_user_saveinfo(id)
 	arrayset(g_bHasItem[id], false, sizeof(g_bHasItem[]))
+	
+	if(g_eSettings[CSHOP_REOPEN_AFTER_USE])
+		g_iPage[id] = 0
 	
 	if(g_eSettings[CSHOP_SAVE_LIMIT])
 	{
@@ -938,7 +945,13 @@ public Menu_Shop(id)
 		menu_setprop(iMenu, MPROP_NEXTNAME, g_eSettings[CSHOP_NEXTPAGE])
 		menu_setprop(iMenu, MPROP_EXITNAME, g_eSettings[CSHOP_EXITMENU])
 		menu_setprop(iMenu, MPROP_PERPAGE, g_eSettings[CSHOP_PERPAGE])
-		menu_display(id, iMenu, 0)
+		
+		if(g_eSettings[CSHOP_REOPEN_AFTER_USE])
+		{
+			menu_display(id, iMenu, clamp(g_iPage[id], .max = iPages - 1))
+			g_iPage[id] = 0
+		}
+		else menu_display(id, iMenu)
 	}
 	
 	return PLUGIN_HANDLED
@@ -947,13 +960,19 @@ public Menu_Shop(id)
 public Shop_Handler(id, iMenu, iItem)
 {
 	if(iItem == MENU_EXIT || !is_user_alive(id))
-		goto @DESTROY_SHOP
+	{
+		menu_destroy(iMenu)
+		return PLUGIN_HANDLED
+	}
 	
 	static iReturn
 	ExecuteForward(g_fwdMenuOpened, iReturn, id)
 	
 	if(iReturn == PLUGIN_HANDLED)
-		goto @DESTROY_SHOP
+	{
+		menu_destroy(iMenu)
+		return PLUGIN_HANDLED
+	}
 		
 	static szData[10], szPrice[7], szKey[3], iUnused, iPrice, iKey
 	menu_item_getinfo(iMenu, iItem, iUnused, szData, charsmax(szData), .callback = iUnused)
@@ -993,8 +1012,15 @@ public Shop_Handler(id, iMenu, iItem)
 	}
 	else buyItem(id, iKey, iPrice)
 	
-	@DESTROY_SHOP:
 	menu_destroy(iMenu)
+	
+	if(g_eSettings[CSHOP_REOPEN_AFTER_USE])
+	{
+		static iUnused
+		player_menu_info(id, iUnused, iUnused, g_iPage[id])
+		Menu_Shop(id)
+	}
+		
 	return PLUGIN_HANDLED
 }
 
