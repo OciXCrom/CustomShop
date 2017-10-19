@@ -12,7 +12,7 @@
 #include <fun>
 #include <hamsandwich>
 
-#define PLUGIN_VERSION "4.1+"
+#define PLUGIN_VERSION "4.2"
 #define TASK_HEALTHREGEN 400040
 #define TASK_ARMORREGEN 400140
 #define m_pActiveItem 373
@@ -244,6 +244,9 @@ public cshop_item_removed(id, iItem)
 
 public OnPlayerResetMaxSpeed(id)
 {
+	if(!is_user_alive(id))
+		return
+		
 	if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]])
 		set_user_maxspeed(id, g_eSettings[Drugs_Speed_Add] ? get_user_maxspeed(id) + g_eSettings[Drugs_Speed] : g_eSettings[Drugs_Speed])
 	else if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]])
@@ -252,6 +255,9 @@ public OnPlayerResetMaxSpeed(id)
 
 public OnChangeWeapon(id)
 {
+	if(!is_user_alive(id))
+		return
+		
 	if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_UNLCLIP]])
 	{
 		new iWeapon = read_data(2)
