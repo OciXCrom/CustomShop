@@ -243,7 +243,7 @@ native cshop_find_item_by_id(id[])
  * @param buffer 		Buffer length.
  * @return 				Integer or float type data. -1 on failure.
  */
-native any:cshop_get_item_data(item, any:type, buffer[], len)
+native any:cshop_get_item_data(item, any:type, buffer[] = "", len = 0)
 #define cshop_get_name(%1,%2,%3) cshop_get_item_data(%1, CSHOP_DATA_NAME, %2, %3)
 
 /** 
