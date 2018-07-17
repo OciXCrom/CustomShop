@@ -5,12 +5,35 @@
 #include <cshop_settings>
 
 #define _customshop_included
+
+/**
+ * Used in cshop_item_selected() to prevent buying an item
+ */
 #define DONT_BUY PLUGIN_HANDLED
+
+/**
+ * Used in cshop_item_selected() to allow buying an item
+ */
 #define BUY_ITEM PLUGIN_CONTINUE
+
+/**
+ * Used in cshop_menu_opened() to prevent opening the shop
+ */
 #define SHOP_CLOSE PLUGIN_HANDLED
+
+/**
+ * Used in cshop_menu_opened() to allow opening the shop
+ */
 #define SHOP_OPEN PLUGIN_CONTINUE
+
+/**
+ * Typically used for registering an item variable, nothing fancy
+ */
 #define additem new
 
+/**
+ * Data types for cshop_get_item_data()
+ */
 enum _:CshopData
 {
 	CSHOP_DATA_ID = 0,
@@ -22,14 +45,6 @@ enum _:CshopData
 	CSHOP_DATA_TEAM,
 	CSHOP_DATA_FLAGS
 }
-
-/*enum _:CshopPrecache
-{
-	CSHOP_PRECACHE_NONE = 0,
-	CSHOP_PRECACHE_GENERIC,
-	CSHOP_PRECACHE_MODEL,
-	CSHOP_PRECACHE_SOUND
-}*/
 
 /** 
  * Registers a new item.
@@ -45,8 +60,8 @@ enum _:CshopData
  * @param flag	 		If you want only players with a specific flag to be able to buy the item.
  * @return				Item ID.
  */
-native cshopRegisterItem(id[], name[], price, limit = 0, sound[] = DEFAULT_SOUND, Float:duration = 0.0, points = 0, team = 0, flag[] = "")
-#define cshop_register_item cshopRegisterItem
+native cshop_register_item(id[], name[], price, limit = 0, sound[] = DEFAULT_SOUND, Float:duration = 0.0, points = 0, team = 0, flag[] = "")
+#define cshopRegisterItem cshop_register_item
 
 /** 
  * Checks whether a player has an item or not.
@@ -55,16 +70,16 @@ native cshopRegisterItem(id[], name[], price, limit = 0, sound[] = DEFAULT_SOUND
  * @param item			Item ID.
  * @return				True if he has, false if he hasn't.
  */
-native bool:cshopHasItem(id, item)
-#define cshop_has_item cshopHasItem
+native bool:cshop_has_item(id, item)
+#define cshopHasItem cshop_has_item
 
 /** 
  * Checks whether the points system is enabled.
  * 
  * @return				True if it is, false if it isn't.
  */
-native bool:cshopPointsEnabled()
-#define cshop_points_enabled cshopPointsEnabled
+native bool:cshop_points_enabled()
+#define cshopPointsEnabled cshop_points_enabled
 
 /** 
  * Checks player's item limit.
@@ -73,8 +88,8 @@ native bool:cshopPointsEnabled()
  * @param item			Item ID.
  * @return				Player's item limit.
  */
-native cshopGetLimit(id, item)
-#define cshop_get_limit cshopGetLimit
+native cshop_get_limit(id, item)
+#define cshopGetLimit cshop_get_limit
 
 /** 
  * Removes a player's item.
@@ -83,8 +98,8 @@ native cshopGetLimit(id, item)
  * @param item			Item ID.
  * @noreturn
  */
-native cshopRemoveItem(id, item)
-#define cshop_remove_item cshopRemoveItem
+native cshop_remove_item(id, item)
+#define cshopRemoveItem cshop_remove_item
 
 /** 
  * Called right before an item is purchased.
@@ -93,8 +108,8 @@ native cshopRemoveItem(id, item)
  * @param item			Item ID.
  * @noreturn
  */
-forward cshopItemBought(id, item)
-#define cshop_item_selected cshopItemBought
+forward cshop_item_selected(id, item)
+#define cshopItemBought cshop_item_selected
 
 /** 
  * Called when an item is removed.
@@ -103,8 +118,8 @@ forward cshopItemBought(id, item)
  * @param item			Item ID.
  * @noreturn
  */
-forward cshopItemRemoved(id, item)
-#define cshop_item_removed cshopItemRemoved
+forward cshop_item_removed(id, item)
+#define cshopItemRemoved cshop_item_removed
 
 /** 
  * Called right before the menu is opened.
@@ -120,16 +135,16 @@ forward cshop_menu_opened(id, item)
  * @param id 			Player's index.
  * @noreturn
  */
-native cshopErrorSound(id)
-#define cshop_error_sound cshopErrorSound
+native cshop_error_sound(id)
+#define cshopErrorSound cshop_error_sound
 
 /** 
  * Gets the total number of loaded items.
  * 
  * @return				Total number of loaded items.
  */
-native cshopTotalItems()
-#define cshop_total_items cshopTotalItems
+native cshop_total_items()
+#define cshopTotalItems cshop_total_items
 
 /** 
  * Give/take points to/from a player.
@@ -138,8 +153,8 @@ native cshopTotalItems()
  * @param points		Amount of points.
  * @noreturn
  */
-native cshopGivePoints(id, points)
-#define cshop_give_points cshopGivePoints
+native cshop_give_points(id, points)
+#define cshopGivePoints cshop_give_points
 
 /** 
  * Return player points.
@@ -147,8 +162,8 @@ native cshopGivePoints(id, points)
  * @param id 			Player's index.
  * @return 				Player's points.
  */
-native cshopGetPoints(id)
-#define cshop_get_points cshopGetPoints
+native cshop_get_points(id)
+#define cshopGetPoints cshop_get_points
 
 /** 
  * Gets the plugin prefix.
