@@ -7,7 +7,7 @@
 #include <hamsandwich>
 #include <nvault>
 
-#define PLUGIN_VERSION "4.2"
+#define PLUGIN_VERSION "4.2.1"
 #define TASK_HUDBAR 388838
 #define mtop(%1) floatround(float(%1) / 10.0, floatround_floor)
 #define nvault_clear(%1) nvault_prune(%1, 0, get_systime() + 1)
@@ -175,8 +175,8 @@ public plugin_init()
 	register_clcmd("cshop_edit", "Menu_Editor", FLAG_ADMIN, "-- open the editor")
 	register_clcmd("cshop_edit_item", "Cmd_Edit")
 	
-	g_fwdSelectItem = CreateMultiForward("cshopItemBought", ET_STOP, FP_CELL, FP_CELL)
-	g_fwdRemoveItem = CreateMultiForward("cshopItemRemoved", ET_IGNORE, FP_CELL, FP_CELL)
+	g_fwdSelectItem = CreateMultiForward("cshop_item_selected", ET_STOP, FP_CELL, FP_CELL)
+	g_fwdRemoveItem = CreateMultiForward("cshop_item_removed", ET_IGNORE, FP_CELL, FP_CELL)
 	g_fwdMenuOpened = CreateMultiForward("cshop_menu_opened", ET_STOP, FP_CELL)
 	g_fwdSetPrice = CreateMultiForward("cshop_set_price", ET_STOP, FP_CELL, FP_CELL, FP_CELL)
 	
@@ -1329,15 +1329,15 @@ bool:is_blank(szString[])
 public plugin_natives()
 {
 	register_library("CustomShop")
-	register_native("cshopRegisterItem", "_cshop_register_item")
-	register_native("cshopHasItem", "_cshop_has_item")
-	register_native("cshopPointsEnabled", "_cshop_points_enabled")
-	register_native("cshopGetLimit", "_cshop_get_limit")
-	register_native("cshopRemoveItem", "_cshop_remove_item")
-	register_native("cshopErrorSound", "_cshop_error_sound")
-	register_native("cshopTotalItems", "_cshop_total_items")
-	register_native("cshopGivePoints", "_cshop_give_points")
-	register_native("cshopGetPoints", "_cshop_get_points")
+	register_native("cshop_register_item", "_cshop_register_item")
+	register_native("cshop_has_item", "_cshop_has_item")
+	register_native("cshop_points_enabled", "_cshop_points_enabled")
+	register_native("cshop_get_limit", "_cshop_get_limit")
+	register_native("cshop_remove_item", "_cshop_remove_item")
+	register_native("cshop_error_sound", "_cshop_error_sound")
+	register_native("cshop_total_items", "_cshop_total_items")
+	register_native("cshop_give_points", "_cshop_give_points")
+	register_native("cshop_get_points", "_cshop_get_points")
 	register_native("cshop_get_prefix", "_cshop_get_prefix")
 	register_native("cshop_open", "_cshop_open")	
 	register_native("cshop_set_int", "_cshop_set_int")	
