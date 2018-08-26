@@ -7,7 +7,7 @@
 #include <hamsandwich>
 #include <nvault>
 
-#define PLUGIN_VERSION "4.2.2"
+#define PLUGIN_VERSION "4.2.3"
 #define TASK_HUDBAR 388838
 #define mtop(%1) floatround(float(%1) / 10.0, floatround_floor)
 #define nvault_clear(%1) nvault_prune(%1, 0, get_systime() + 1)
@@ -570,7 +570,7 @@ public client_disconnect(id)
 		use_vault(id, 0, g_szInfo[id])
 }
 	
-public client_putinserver(id)
+public client_connect(id)
 {
 	get_user_saveinfo(id)
 	arrayset(g_bHasItem[id], false, sizeof(g_bHasItem[]))
