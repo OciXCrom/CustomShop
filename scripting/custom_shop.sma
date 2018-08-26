@@ -7,7 +7,7 @@
 #include <hamsandwich>
 #include <nvault>
 
-#define PLUGIN_VERSION "4.2.1"
+#define PLUGIN_VERSION "4.2.2"
 #define TASK_HUDBAR 388838
 #define mtop(%1) floatround(float(%1) / 10.0, floatround_floor)
 #define nvault_clear(%1) nvault_prune(%1, 0, get_systime() + 1)

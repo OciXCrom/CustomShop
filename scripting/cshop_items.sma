@@ -12,7 +12,7 @@
 #include <fun>
 #include <hamsandwich>
 
-#define PLUGIN_VERSION "4.2.1"
+#define PLUGIN_VERSION "4.2.2"
 #define TASK_HEALTHREGEN 400040
 #define TASK_ARMORREGEN 400140
 #define m_pActiveItem 373
@@ -230,10 +230,10 @@ public cshop_item_removed(id, iItem)
 	
 	if(iItem == DEFAULT_ITEMS[ITEM_UNLCLIP]) 				{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_UNLCLIP]] = false; }
 	else if(iItem == DEFAULT_ITEMS[ITEM_SILENTSTEPS]) 		{ set_user_footsteps(id, 0); }
-	else if(iItem == DEFAULT_ITEMS[ITEM_SPEED]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]] = false; OnPlayerResetMaxSpeed(id); }
+	else if(iItem == DEFAULT_ITEMS[ITEM_SPEED]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_SPEED]] = false; ExecuteHamB(Ham_Item_PreFrame, id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_GRAVITY]) 			{ set_user_gravity(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_CHAMELEON]) 		{ cs_reset_user_model(id); }
-	else if(iItem == DEFAULT_ITEMS[ITEM_DRUGS]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]] = false; OnPlayerResetMaxSpeed(id); }
+	else if(iItem == DEFAULT_ITEMS[ITEM_DRUGS]) 			{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_DRUGS]] = false; ExecuteHamB(Ham_Item_PreFrame, id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_TRANSPARENCY]) 		{ remove_user_glow(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_INVIS]) 			{ remove_user_glow(id); }
 	else if(iItem == DEFAULT_ITEMS[ITEM_MOREDAMAGE]) 		{ g_bHasItem[id][DEFAULT_ITEMS[ITEM_MOREDAMAGE]] = false; }
@@ -261,9 +261,17 @@ public OnChangeWeapon(id)
 	if(g_bHasItem[id][DEFAULT_ITEMS[ITEM_UNLCLIP]])
 	{
 		new iWeapon = read_data(2)
+
+		if(iWeapon < 0 || iWeapon > sizeof(g_iMaxClip) - 1)
+			return
 		
 		if(weapon_uses_ammo(iWeapon))
-			cs_set_weapon_ammo(get_pdata_cbase(id, m_pActiveItem), g_eSettings[UnlClip_Ammo] == -1 ? g_iMaxClip[iWeapon] : g_eSettings[UnlClip_Ammo])
+		{
+			new iActiveItem = get_pdata_cbase(id, m_pActiveItem)
+
+			if(pev_valid(iActiveItem))
+				cs_set_weapon_ammo(iActiveItem, g_eSettings[UnlClip_Ammo] == -1 ? g_iMaxClip[iWeapon] : g_eSettings[UnlClip_Ammo])
+		}
 	}
 }
 
