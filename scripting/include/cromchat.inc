@@ -53,7 +53,7 @@
 
 #define CromChat CC_SendMessage
 
-const Float:CC_VERSION            = 3.1
+const Float:CC_VERSION            = 3.2
 const CC_MAX_ACT_PREFIX_SIZE      = 10
 const CC_MAX_PLAYERS              = 32
 const CC_MAX_PREFIX_SIZE          = 64
